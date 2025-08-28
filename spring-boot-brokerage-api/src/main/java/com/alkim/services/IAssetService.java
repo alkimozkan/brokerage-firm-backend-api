@@ -8,9 +8,12 @@ public interface IAssetService {
 	
 	public Long getAssetUsableSize(Long customerId, String assetName);
 	
+	public Long getAssetSize(Long customerId, String assetName);
+	
 	public void updateUsableSize(Long customerId, String assetName, Long newValue);
 	
 	public List<DtoAsset> getAllAssetsByCustomerId(Long customerId);
 
-
+	public void updateSize(Long customerId, String assetName, Long newValue);
+	
 }

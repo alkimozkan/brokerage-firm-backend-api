@@ -27,12 +27,31 @@ public class AssetSeviceImpl implements IAssetService{
 	}
 	
 	@Override
+	public Long getAssetSize(Long customerId, String assetName) {
+		// TODO Auto-generated method stub
+		Optional<Asset> assetOpt = assetRepository.findByAssetNameAndCustomerId(assetName, customerId);
+
+        return assetOpt.map(Asset::getSize).orElse(null);
+	}
+	
+	@Override
 	public void updateUsableSize(Long customerId, String assetName, Long newValue) {
 		
 		Optional<Asset> assetOpt = assetRepository.findByAssetNameAndCustomerId(assetName, customerId);
 		 if(assetOpt.isPresent()) {
 	            Asset asset = assetOpt.get();
 	            asset.setUsableSize(newValue);
+	            assetRepository.save(asset);
+	        }
+	}
+	
+	@Override
+	public void updateSize(Long customerId, String assetName, Long newValue) {
+		
+		Optional<Asset> assetOpt = assetRepository.findByAssetNameAndCustomerId(assetName, customerId);
+		 if(assetOpt.isPresent()) {
+	            Asset asset = assetOpt.get();
+	            asset.setSize(newValue);;
 	            assetRepository.save(asset);
 	        }
 	}

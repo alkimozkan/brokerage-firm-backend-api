@@ -29,34 +29,54 @@ public class OrderServiceImpl implements IOrderService{
 	public DtoOrder createOrder(DtoOrderIU dtoOrderIU) {
 		DtoOrder response = new DtoOrder();
 		Order order = new Order();
+		
+		if(dtoOrderIU.getAssetName().equals("TRY")) {
+			System.out.println("You cannot buy or sell TRY!!");
+	    	response.setErrorMessage("You cannot buy or sell TRY!!");
+	    	return response;
+		}
+		
 		Long usableSize = assetServiceImpl.getAssetUsableSize(dtoOrderIU.getCustomer().getId(), dtoOrderIU.getAssetName());
+		Long size = assetServiceImpl.getAssetSize(dtoOrderIU.getCustomer().getId(), dtoOrderIU.getAssetName());
+		Long sizeTRY = assetServiceImpl.getAssetSize(dtoOrderIU.getCustomer().getId(), "TRY");
+
+		
 	    System.out.println("usableSize: "+usableSize);
+	    System.out.println("size: "+size);
+
 	    
-	    if(dtoOrderIU.getOrderSide().getId() == 1) { //SELL
-		    if(usableSize < dtoOrderIU.getSize()) {
-		    	System.out.println("Sell order size cannot be greater than usable size!!");
-		    	response.setErrorMessage("Sell order size cannot be greater than usable size!!");
-		    	return response;
-		    } else {
-		    	Long newValue = usableSize - dtoOrderIU.getSize();
-		    	assetServiceImpl.updateUsableSize(dtoOrderIU.getCustomer().getId(), dtoOrderIU.getAssetName(), newValue);
-		    }
-		    
-	    } else if (dtoOrderIU.getOrderSide().getId() == 0){ //BUY
-	    	Long totalAmount = dtoOrderIU.getPrice() * dtoOrderIU.getSize();
-	    	Long usableSizeTRY = assetServiceImpl.getAssetUsableSize(dtoOrderIU.getCustomer().getId(), "TRY");
-	    	if(totalAmount > usableSizeTRY) {
-	    		System.out.println("Usable size TRY should be greater than order amount!!");
-	    		response.setErrorMessage("Usable size TRY should be greater than order amount!!");
-		    	return response;
-	    	} else {
-	    		Long newValue = usableSizeTRY - totalAmount;
-	    		assetServiceImpl.updateUsableSize(dtoOrderIU.getCustomer().getId(), "TRY", newValue);
-	    	}
-	    } else {
-	    	return null;
-	    }
+	    
+	    if(usableSize != null) {
 	    	
+		    if(dtoOrderIU.getOrderSide().getSideName().equals("SELL") ) { //SELL
+			    if(usableSize < dtoOrderIU.getSize()) {
+			    	System.out.println("Sell order size cannot be greater than usable size!!");
+			    	response.setErrorMessage("Sell order size cannot be greater than usable size!!");
+			    	return response;
+			    } else {
+			    	Long newValueUsableSize = usableSize - dtoOrderIU.getSize();
+			    	assetServiceImpl.updateUsableSize(dtoOrderIU.getCustomer().getId(), dtoOrderIU.getAssetName(), newValueUsableSize); //Update non TRY usable size
+			    	Long newValueSize = sizeTRY + dtoOrderIU.getPrice() * dtoOrderIU.getSize(); 
+			    	assetServiceImpl.updateSize(dtoOrderIU.getCustomer().getId(), "TRY", newValueSize); //update TRY size
+			    }
+			    
+		    } else if (dtoOrderIU.getOrderSide().getSideName().equals("BUY")){ //BUY
+		    	Long totalAmount = dtoOrderIU.getPrice() * dtoOrderIU.getSize();
+		    	Long usableSizeTRY = assetServiceImpl.getAssetUsableSize(dtoOrderIU.getCustomer().getId(), "TRY");
+		    	if(totalAmount > usableSizeTRY) {
+		    		System.out.println("Usable size TRY should be greater than order amount!!");
+		    		response.setErrorMessage("Usable size TRY should be greater than order amount!!");
+			    	return response;
+		    	} else {
+		    		Long newValueUsableSize = usableSizeTRY - totalAmount;
+		    		assetServiceImpl.updateUsableSize(dtoOrderIU.getCustomer().getId(), "TRY", newValueUsableSize);
+		    		Long newValueSize = size + dtoOrderIU.getSize();
+		    		assetServiceImpl.updateSize(dtoOrderIU.getCustomer().getId(), dtoOrderIU.getAssetName(), newValueSize);
+		    	}
+		    } else {
+		    	return null;
+		    }
+	    }
 		BeanUtils.copyProperties(dtoOrderIU, order);
 		Order dbOrder = orderRepository.save(order);
 		BeanUtils.copyProperties(dbOrder, response); 
@@ -74,6 +94,7 @@ public class OrderServiceImpl implements IOrderService{
 			dto.setCreateDate(order.getCreateDate());
 			dto.setPrice(order.getPrice());
 			dto.setCustomerName(order.getCustomer().getCustomerName());
+			dto.setOrderID(order.getId());
 			//dto.setCustomerID(order.getCustomer().getId());
 			//dto.setAssetID(order.getAsset().getId());
 			dto.setAssetName(order.getAsset().getAssetName());
@@ -99,7 +120,7 @@ public class OrderServiceImpl implements IOrderService{
 		
 		for (Order order : orderList) {
 			
-			if(!order.getStatus().getStatusName().equals("PENDING")) { //TODO: can be changed with final param 
+			if(!order.getStatus().getStatusName().equals("PENDING")) { 
 				continue;
 			}
 			
@@ -116,7 +137,7 @@ public class OrderServiceImpl implements IOrderService{
 		List<Order> pendingOrderList = getPendingOrdersByCustomerId(customerId);
 		
 		Status nStatus = new Status();
-	    OrderStatus orderStatus = OrderStatus.CANCELED;
+	    OrderStatus orderStatus = OrderStatus.CANCELLED;
 	    nStatus.setId(orderStatus.getCode());
 		
 		if(!pendingOrderList.isEmpty()) {
@@ -126,15 +147,22 @@ public class OrderServiceImpl implements IOrderService{
 					updateOrder.setStatus(nStatus);
 					orderRepository.save(updateOrder);
 					
-					if(updateOrder.getOrderSide().getId() == 0) { //Canceling a BUY
+					if(updateOrder.getOrderSide().getSideName().equals("BUY")) { //Canceling a BUY
 						Long amount = updateOrder.getPrice() * updateOrder.getSize();
 						Long usableSizeTRY = assetServiceImpl.getAssetUsableSize(customerId, "TRY") + amount;
 						assetServiceImpl.updateUsableSize(customerId, "TRY", usableSizeTRY);
+						
+						Long size = assetServiceImpl.getAssetSize(customerId, updateOrder.getAsset().getAssetName()) - updateOrder.getSize();
+						assetServiceImpl.updateSize(customerId, updateOrder.getAsset().getAssetName(), size);
+
 						return "Buy order canceled succesfully";
-					} else if(updateOrder.getOrderSide().getId() == 1) { //Canceling a SELL
+					} else if(updateOrder.getOrderSide().getSideName().equals("SELL")) { //Canceling a SELL
 						Long amount = updateOrder.getPrice() * updateOrder.getSize();
-						Long usableSizeTRY = assetServiceImpl.getAssetUsableSize(customerId, updateOrder.getAsset().getAssetName()) + amount;
-						assetServiceImpl.updateUsableSize(customerId, updateOrder.getAsset().getAssetName(), usableSizeTRY);
+						Long sizeTRY = assetServiceImpl.getAssetSize(customerId, "TRY") - amount;
+						assetServiceImpl.updateSize(customerId, "TRY", sizeTRY);
+
+						Long usableSize = assetServiceImpl.getAssetUsableSize(customerId, updateOrder.getAsset().getAssetName()) + updateOrder.getSize();
+						assetServiceImpl.updateUsableSize(customerId, updateOrder.getAsset().getAssetName(), usableSize);
 						return "Sell order canceled succesfully";
 					}
 				}

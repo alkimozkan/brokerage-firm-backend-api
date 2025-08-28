@@ -22,6 +22,8 @@ public class DtoOrder {
 	
 	private String customerName;
 	
+	private Long orderID;
+	
 	//private Long customerID;
 
 	//private Asset asset;

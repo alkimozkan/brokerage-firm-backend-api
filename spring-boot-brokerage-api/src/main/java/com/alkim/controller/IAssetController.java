@@ -9,6 +9,9 @@ public interface IAssetController {
 	
 	public Long getAssetUsableSize(Long customerId, String assetName);
 	
+	public Long getAssetSize(Long customerId, String assetName);
+	
 	public List<DtoAsset> getAllAssetsByCustomerId(Long customerId);
+
 
 }

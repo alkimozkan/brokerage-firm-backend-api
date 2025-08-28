@@ -39,9 +39,9 @@ public class OrderControllerImpl implements IOrderController{
 	}
 	
 	public enum OrderStatus {
-	    PENDING((long)0),
-	    MATCHED((long)1),
-	    CANCELED((long)2);
+	    PENDING((long)1),
+	    MATCHED((long)2),
+	    CANCELLED((long)3);
 
 	    private final long code;
 

@@ -26,6 +26,14 @@ public class AssetControllerImpl implements IAssetController {
 		// TODO Auto-generated method stub
 		return assetService.getAssetUsableSize(customerId, assetName);
 	}
+	
+	@GetMapping(path = "/size/{customerId}/{assetName}")
+	@Override
+	public Long getAssetSize(@PathVariable(name = "customerId") Long customerId,@PathVariable(name = "assetName") String assetName) {
+		// TODO Auto-generated method stub
+		return assetService.getAssetUsableSize(customerId, assetName);
+	}
+	
 	@GetMapping(path = "/{customerId}")
 	@Override
 	public List<DtoAsset> getAllAssetsByCustomerId(@PathVariable(name = "customerId") Long customerId) {
