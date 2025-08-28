@@ -1,3 +1,3 @@
 # brokerage-firm-backend-api
 
-Study case for developing backend api for a brokerage firm
+Case study for developing backend api for a brokerage firm
