@@ -55,6 +55,8 @@ public class OrderServiceImpl implements IOrderService{
 			    	return response;
 			    } else {
 			    	Long newValueUsableSize = usableSize - dtoOrderIU.getSize();
+			    	Long newValueSizeNonTry = size - dtoOrderIU.getSize();
+			    	assetServiceImpl.updateSize(dtoOrderIU.getCustomer().getId(), dtoOrderIU.getAssetName(), newValueSizeNonTry);
 			    	assetServiceImpl.updateUsableSize(dtoOrderIU.getCustomer().getId(), dtoOrderIU.getAssetName(), newValueUsableSize); //Update non TRY usable size
 			    	Long newValueSize = sizeTRY + dtoOrderIU.getPrice() * dtoOrderIU.getSize(); 
 			    	assetServiceImpl.updateSize(dtoOrderIU.getCustomer().getId(), "TRY", newValueSize); //update TRY size
