@@ -150,19 +150,28 @@ public class OrderServiceImpl implements IOrderService{
 					if(updateOrder.getOrderSide().getSideName().equals("BUY")) { //Canceling a BUY
 						Long amount = updateOrder.getPrice() * updateOrder.getSize();
 						Long usableSizeTRY = assetServiceImpl.getAssetUsableSize(customerId, "TRY") + amount;
-						assetServiceImpl.updateUsableSize(customerId, "TRY", usableSizeTRY);
-						
+						if(usableSizeTRY != null)
+							assetServiceImpl.updateUsableSize(customerId, "TRY", usableSizeTRY);
+						else
+							return "Customer does not have asset";
 						Long size = assetServiceImpl.getAssetSize(customerId, updateOrder.getAsset().getAssetName()) - updateOrder.getSize();
-						assetServiceImpl.updateSize(customerId, updateOrder.getAsset().getAssetName(), size);
-
+						if(size != null)
+							assetServiceImpl.updateSize(customerId, updateOrder.getAsset().getAssetName(), size);
+						else
+							return "Customer does not have asset";
 						return "Buy order canceled succesfully";
 					} else if(updateOrder.getOrderSide().getSideName().equals("SELL")) { //Canceling a SELL
 						Long amount = updateOrder.getPrice() * updateOrder.getSize();
 						Long sizeTRY = assetServiceImpl.getAssetSize(customerId, "TRY") - amount;
+						if(sizeTRY != null)
 						assetServiceImpl.updateSize(customerId, "TRY", sizeTRY);
-
+						else
+							return "Customer does not have asset";
 						Long usableSize = assetServiceImpl.getAssetUsableSize(customerId, updateOrder.getAsset().getAssetName()) + updateOrder.getSize();
-						assetServiceImpl.updateUsableSize(customerId, updateOrder.getAsset().getAssetName(), usableSize);
+						if(usableSize != null)
+							assetServiceImpl.updateUsableSize(customerId, updateOrder.getAsset().getAssetName(), usableSize);
+						else
+							return "Customer does not have asset";
 						return "Sell order canceled succesfully";
 					}
 				}

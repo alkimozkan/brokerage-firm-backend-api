@@ -23,7 +23,8 @@ public class AssetSeviceImpl implements IAssetService{
 		// TODO Auto-generated method stub
 		Optional<Asset> assetOpt = assetRepository.findByAssetNameAndCustomerId(assetName, customerId);
 
-        return assetOpt.map(Asset::getUsableSize).orElse(null);
+		return assetOpt.map(a -> a.getUsableSize() != null ? a.getUsableSize() : 0L).orElse(0L);
+        
 	}
 	
 	@Override
@@ -31,7 +32,7 @@ public class AssetSeviceImpl implements IAssetService{
 		// TODO Auto-generated method stub
 		Optional<Asset> assetOpt = assetRepository.findByAssetNameAndCustomerId(assetName, customerId);
 
-        return assetOpt.map(Asset::getSize).orElse(null);
+		return assetOpt.map(a -> a.getSize() != null ? a.getSize() : 0L).orElse(0L);
 	}
 	
 	@Override

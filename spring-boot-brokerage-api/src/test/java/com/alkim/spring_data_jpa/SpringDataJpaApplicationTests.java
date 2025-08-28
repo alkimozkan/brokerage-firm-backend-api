@@ -121,7 +121,7 @@ class SpringDataJpaApplicationTests {
 	@Test
 	public void testDeleteOrderById() {
 		
-		String result = orderServiceImpl.deleteOrderById(1L, 1L);
+		String result = orderServiceImpl.deleteOrderById(1L, 3L);
 		
 		List<String> expected = Arrays.asList("Buy order canceled succesfully", "Sell order canceled succesfully");
 		assertTrue(expected.contains(result));
