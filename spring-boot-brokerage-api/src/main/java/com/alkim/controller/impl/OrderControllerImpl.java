@@ -63,6 +63,12 @@ public class OrderControllerImpl implements IOrderController{
 		return orderService.getOrderByIdAndDate(id, startDate, endDate);
 	}
 	
+	@GetMapping(path = "delete/{id}/{customerId}")
+	@Override
+	public String deleteOrderById(@PathVariable(name = "id") Long id,@PathVariable(name = "customerId") Long customerId) {
+		return orderService.deleteOrderById(id, customerId);
+	}
+	
 	
 
 }

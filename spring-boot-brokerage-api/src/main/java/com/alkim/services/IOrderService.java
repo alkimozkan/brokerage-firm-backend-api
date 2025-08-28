@@ -11,7 +11,7 @@ public interface IOrderService {
 	public DtoOrder createOrder(DtoOrderIU order);
 	
 	public List<DtoOrder> getOrderByIdAndDate(Long id, Date startDate, Date endDate);
-	
-
+		
+	public String deleteOrderById(Long id, Long customerId);
 
 }

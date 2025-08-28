@@ -1,5 +1,6 @@
 package com.alkim.controller.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +12,7 @@ import com.alkim.entities.Asset;
 public interface AssetRepository extends JpaRepository<Asset, Integer>{
 	
     Optional<Asset> findByAssetNameAndCustomerId(String assetName, Long customerId);
-
+    
+    List<Asset> findByCustomerId(Long customerId);
 
 }

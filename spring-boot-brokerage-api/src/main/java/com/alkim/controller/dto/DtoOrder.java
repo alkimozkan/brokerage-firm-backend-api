@@ -43,5 +43,7 @@ public class DtoOrder {
 	private String statusType;
 
 	private Date createDate;
+	
+	private String errorMessage;
 
 }
